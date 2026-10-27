@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Ember \u2014 keep the fire alive",
   "short_name": "Ember",
-  "description": "A local-first habit tracker built around one small daily flame. Earn slots with real streaks and keep the chain alive.",
+  "description": "A local-first habit tracker built around one small recurring flame. Daily, fixed-day, or weekly-quota rhythms; earn slots with real runs and keep the chain alive.",
   "lang": "en",
   "dir": "ltr",
   "start_url": "./",
@@ -50,7 +50,7 @@
     {
       "name": "Today",
       "short_name": "Today",
-      "description": "Light today's flames",
+      "description": "Log what is due today",
       "url": "./#today",
       "icons": [
         {
@@ -78,7 +78,7 @@
       "sizes": "780x1688",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Today: flames, live streak and the next slot"
+      "label": "Today: cadences, live run and the next slot"
     },
     {
       "src": "screenshots/progress.png",

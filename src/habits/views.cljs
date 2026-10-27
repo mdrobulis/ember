@@ -83,30 +83,173 @@
             :on-change #(on-change (.-value (.-target %)))}]
    (when hint [:p {:class "field-hint"} hint])])
 
+
+(defn- select-field
+  [{:keys [id label value options hint on-change]}]
+  [:div
+   [:label {:for id :class "field-label"} label]
+   [:select {:id id
+             :name id
+             :class "field"
+             :value (name value)
+             :on-change #(on-change (keyword (.-value (.-target %))))}
+    (for [[option label] options]
+      ^{:key option}
+      [:option {:value (name option)} label])]
+   (when hint [:p {:class "field-hint"} hint])])
+
+(defn- weekday-picker
+  [{:keys [id legend selected on-toggle hint]}]
+  [:fieldset {:class "min-w-0"}
+   [:legend {:class "field-label"} legend]
+   [:div {:class "grid grid-cols-4 gap-1.5 sm:grid-cols-7"}
+    (for [[day label] (ui/weekday-options-list)]
+      ^{:key day}
+      [:label {:class (str "flex min-h-10 cursor-pointer items-center justify-center rounded-xl border px-1 text-xs font-medium transition focus-within:ring-2 focus-within:ring-ember-400 focus-within:ring-offset-2 focus-within:ring-offset-ink-950 "
+                           (if (contains? selected day)
+                             "border-ember-400/40 bg-ember-500/15 text-ember-100"
+                             "border-white/10 bg-white/[0.03] text-slate-400 hover:border-white/20"))}
+       [:input {:id (str id "-" day)
+                :type "checkbox"
+                :class "sr-only"
+                :checked (contains? selected day)
+                :on-change #(on-toggle day (.-checked (.-target %)))}]
+       [:span label]])]
+   (when hint [:p {:class "field-hint"} hint])])
+
+(defn- schedule-valid?
+  [schedule]
+  (case (:schedule/type schedule)
+    :fixed-days (seq (:schedule/days schedule))
+    :weekly-quota (let [days (:schedule/days schedule)
+                        cap (if (seq days) (count days) 7)
+                        target (:schedule/target schedule)]
+                    (and (integer? target) (<= 1 target cap)))
+    true))
+
+(defn- schedule-for-type
+  [type days]
+  (let [days (set days)
+        cap (if (seq days) (count days) 7)]
+    (case type
+      :daily {:schedule/type :daily}
+      :fixed-days {:schedule/type :fixed-days
+                   :schedule/days (or (seq days) #{})}
+      :weekly-quota (cond-> {:schedule/type :weekly-quota
+                             :schedule/target (max 1 (min 3 cap))}
+                      (seq days) (assoc :schedule/days days)))))
+
+(defn- quota-fields
+  [{:keys [id days target cap schedule on-change]}]
+  [:div {:class "space-y-4"}
+   [:div
+    [:label {:for (str id "-target") :class "field-label"} "Sessions per week"]
+    [:input {:id (str id "-target")
+             :type "number"
+             :class "field"
+             :min 1
+             :max 7
+             :step 1
+             :value target
+             :on-change #(let [raw (js/parseInt (.-value (.-target %)) 10)
+                               next (if (js/isNaN raw) 1 raw)]
+                           (on-change (assoc schedule
+                                             :schedule/type :weekly-quota
+                                             :schedule/target (max 1 (min 7 next)))))}]
+    [:p {:class "field-hint"}
+     (cond
+       (and (seq days) (> target cap))
+       (str "A " target "-session target does not fit in " cap " allowed days. Add days or lower the target.")
+       (seq days)
+       (str "Counts up to " cap " because only " cap " allowed days are selected.")
+       :else
+       "A session can land on any day. The week closes Sunday.")]]
+   [weekday-picker
+    {:id (str id "-window")
+     :legend "Only on these days (optional)"
+     :selected days
+     :hint "Leave all off for any day. If you choose days, only sessions inside that window count."
+     :on-toggle (fn [day checked?]
+                  (let [next-days (if checked? (conj days day) (disj days day))
+                        next (assoc schedule
+                                     :schedule/type :weekly-quota
+                                     :schedule/target target)]
+                    (on-change (cond-> next
+                                 (seq next-days) (assoc :schedule/days next-days)
+                                 (empty? next-days) (dissoc :schedule/days)))))}]])
+
+(defn- schedule-editor
+  "Shared cadence control for onboarding and the habit editor."
+  [{:keys [id schedule on-change]}]
+  (let [type (:schedule/type schedule)
+        days (set (:schedule/days schedule))
+        target (or (:schedule/target schedule) 3)
+        cap (if (seq days) (count days) 7)]
+    [:div {:class "space-y-4"}
+     [select-field
+      {:id (str id "-type")
+       :label "How often?"
+       :value type
+       :options [[:daily "Every day"]
+                 [:fixed-days "Specific days"]
+                 [:weekly-quota "Times per week"]]
+       :hint "Changing this never changes the days you have already recorded."
+       :on-change #(on-change (schedule-for-type % days))}]
+     (if (= type :fixed-days)
+       [weekday-picker
+        {:id (str id "-fixed")
+         :legend "Which days count?"
+         :selected days
+         :hint "Off days are neutral. They never break the chain."
+         :on-toggle (fn [day checked?]
+                      (let [next-days (if checked? (conj days day) (disj days day))]
+                        (on-change (assoc schedule :schedule/days next-days))))}]
+       (if (= type :weekly-quota)
+         [quota-fields {:id id :days days :target target :cap cap
+                        :schedule schedule :on-change on-change}]
+         [:p {:class "rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3.5 text-xs leading-relaxed text-slate-400"}
+          "Every day counts. A missed day is the only thing that breaks the chain."]))
+     [:div {:class "flex items-center gap-2 text-xs text-slate-400"}
+      [icons/icon "calendar" {:class "h-3.5 w-3.5"}]
+      [:span (if (and (= type :fixed-days) (empty? days))
+               "Pick at least one day"
+               (ui/schedule-label {:habit/schedule schedule}))]]]))
+
 (defn- habit-form
   [{:keys [habit on-save on-archive on-delete on-close add?]}]
   (let [draft (r/atom {:name     (or (:habit/name habit) "")
                        :cue      (or (:habit/cue habit) "")
                        :why      (or (:habit/why habit) "")
-                       :reminder (or (:habit/reminder habit) "")})
+                       :reminder (or (:habit/reminder habit) "")
+                       :schedule (model/schedule-of habit)})
         error (r/atom nil)
         update! (fn [key value] (swap! draft assoc key value))]
     (fn []
-      (let [{:keys [name cue why reminder]} @draft]
+      (let [{:keys [name cue why reminder schedule]} @draft]
         [:form {:on-submit
                 (fn [event]
                   (.preventDefault event)
-                  (if (str/blank? (str/trim name))
+                  (cond
+                    (str/blank? (str/trim name))
                     (reset! error "Give the ritual a name — even a tiny one.")
+
+                    (not (schedule-valid? schedule))
+                    (reset! error "Choose a valid cadence before saving.")
+
+                    :else
                     (on-save {:habit/name     (str/trim name)
                               :habit/cue      (str/trim cue)
                               :habit/why      (str/trim why)
-                              :habit/reminder (when (seq reminder) reminder)})))}
+                              :habit/reminder (when (seq reminder) reminder)
+                              :habit/schedule schedule})))}
          [:div {:class "space-y-4"}
           [field {:id "habit-name" :label "The ritual" :required? true
                   :value name :autofocus true
                   :placeholder "Read 10 pages"
                   :on-change #(update! :name %)}]
+          [schedule-editor {:id "habit-schedule"
+                            :schedule schedule
+                            :on-change #(update! :schedule %)}]
           [field {:id "habit-cue" :label "The cue"
                   :value cue
                   :placeholder "After morning coffee"
@@ -123,7 +266,7 @@
               [:button {:type "button" :class "btn btn-quiet min-h-12 px-3 text-xs"
                         :on-click #(update! :reminder "")} "Clear"])]
            [:p {:class "field-hint"}
-            "Notifications fire while Ember is open. For a closed app, export the daily calendar alarm in Settings."]]
+            "Notifications fire while Ember is open. For a closed app, export the scheduled calendar alarm in Settings."]]
           [field {:id "habit-why" :label "Why it matters"
                   :value why
                   :placeholder "So my mornings start with my own mind."
@@ -159,14 +302,24 @@
 (defn- onboarding
   [{:app/keys [error] :as state} dispatch]
   (let [step (r/atom 1)
-        draft (r/atom {:name "" :cue "" :why "" :reminder ""})
+        draft (r/atom {:name "" :cue "" :why "" :reminder ""
+                       :schedule {:schedule/type :daily}})
         local-error (r/atom nil)
         update! (fn [key value] (swap! draft assoc key value))
+        next! (fn [from]
+                (reset! local-error nil)
+                (reset! step (min 3 (inc from))))
+        back! (fn [from]
+                (reset! local-error nil)
+                (reset! step (max 1 (dec from))))
         finish! (fn []
-                  (let [{:keys [name cue why reminder]} @draft]
+                  (let [{:keys [name cue why reminder schedule]} @draft]
                     (cond
                       (str/blank? (str/trim name))
                       (reset! local-error "A name is enough to begin.")
+
+                      (not (schedule-valid? schedule))
+                      (reset! local-error "Choose a valid cadence.")
 
                       (str/blank? (str/trim cue))
                       (reset! local-error "Name the moment before the ritual. That is the anchor.")
@@ -175,9 +328,10 @@
                       (dispatch [:add {:habit/name     (str/trim name)
                                        :habit/cue      (str/trim cue)
                                        :habit/why      (str/trim why)
-                                       :habit/reminder (when (seq reminder) reminder)}]))))]
+                                       :habit/reminder (when (seq reminder) reminder)
+                                       :habit/schedule schedule}]))))]
     (fn []
-      (let [{:keys [name cue why reminder]} @draft]
+      (let [{:keys [name cue why reminder schedule]} @draft]
         [:main {:class "page-shell flex min-h-[100svh] flex-col justify-center" :id "main"}
          [:div {:class "mx-auto w-full max-w-md animate-slide-up"}
           [:div {:class "mb-7 flex flex-col items-center text-center"}
@@ -188,25 +342,30 @@
            [:div {:class "hero-aurora border-b border-white/[0.06] px-5 py-5 sm:px-6"}
             [:div {:class "flex items-center justify-between gap-3"}
              [:div
-              [:p {:class "eyebrow"} (str "Step " @step " of 2")]
+              [:p {:class "eyebrow"} (str "Step " @step " of 3")]
               [:h1 {:class "display mt-1 text-2xl text-white"}
-               (if (= @step 1) "One small ritual." "Anchor it to a moment.")]]
+               (case @step
+                 1 "One small ritual."
+                 2 "Choose the rhythm."
+                 "Anchor it to a moment.")]]
              [:div {:class "flex gap-1.5" :aria-hidden "true"}
-              (for [i [1 2]]
+              (for [i [1 2 3]]
                 ^{:key i}
                 [:span {:class (str "h-1.5 rounded-full transition-all "
                                     (if (>= @step i) "w-7 bg-ember-400" "w-3 bg-white/15"))}])]]
             [:p {:class "mt-2 text-sm leading-relaxed text-slate-400"}
-             (if (= @step 1)
-               "Pick the smallest daily action you would still call a win on a bad day."
+             (case @step
+               1 "Pick the smallest action you would still call a win on a bad day."
+               2 "Daily, specific days, or a weekly target. Off days are not failures."
                "Name the moment before it. This is the part the research says matters most.")]]
            [:div {:class "p-5 sm:p-6"}
-            (if (= @step 1)
+            (case @step
+              1
               [:form {:on-submit (fn [event]
                                    (.preventDefault event)
                                    (if (str/blank? (str/trim name))
                                      (reset! local-error "A name is enough to begin.")
-                                     (do (reset! local-error nil) (reset! step 2))))}
+                                     (next! 1)))}
                [:div {:class "space-y-4"}
                 [field {:id "onboard-name" :label "The ritual" :required? true
                         :value name :autofocus true
@@ -214,11 +373,30 @@
                         :on-change #(update! :name %)}]
                 [:div {:class "rounded-2xl border border-ember-400/15 bg-ember-500/[0.06] p-3.5"}
                  [:p {:class "text-xs leading-relaxed text-ember-100/80"}
-                  "One flame to start. A 3-day best unlocks a second slot, then 7, 14 and 30 days. The limit is the point: few promises, kept."]]
+                  "One flame to start. Consistency earns room for another: the limit is the point."]]
                 (when @local-error
                   [:p {:class "text-sm text-rose" :role "alert"} @local-error])
                 [:button {:type "submit" :class "btn btn-primary w-full"}
                  "Next" [icons/icon "chevron" {:class "h-4 w-4"}]]]]
+
+              2
+              [:form {:on-submit (fn [event]
+                                   (.preventDefault event)
+                                   (if (schedule-valid? schedule)
+                                     (next! 2)
+                                     (reset! local-error "Choose at least one day, or a target that fits the window.")))}
+               [:div {:class "space-y-4"}
+                [schedule-editor {:id "onboard-schedule"
+                                  :schedule schedule
+                                  :on-change #(update! :schedule %)}]
+                (when @local-error
+                  [:p {:class "text-sm text-rose" :role "alert"} @local-error])
+                [:div {:class "flex gap-2"}
+                 [:button {:type "button" :class "btn btn-ghost flex-1"
+                           :on-click #(back! 2)} "Back"]
+                 [:button {:type "submit" :class "btn btn-primary flex-[1.4]"}
+                  "Next" [icons/icon "chevron" {:class "h-4 w-4"}]]]]]
+
               [:form {:on-submit (fn [event] (.preventDefault event) (finish!))}
                [:div {:class "space-y-4"}
                 [field {:id "onboard-cue" :label "The cue" :required? true
@@ -231,7 +409,7 @@
                  [:input {:id "onboard-reminder" :type "time"
                           :class "field" :value reminder
                           :on-change #(update! :reminder (.-value (.-target %)))}]
-                 [:p {:class "field-hint"} "Optional. Ember will nudge while open, or you can export a daily calendar alarm."]]
+                 [:p {:class "field-hint"} "Optional. Ember will nudge while open, or you can export a scheduled calendar alarm."]]
                 [field {:id "onboard-why" :label "Why it matters"
                         :value why
                         :placeholder "So my mornings start with my own mind."
@@ -241,18 +419,73 @@
                  [:p {:class "eyebrow mb-1"} "The intention"]
                  [:p {:class "text-sm leading-relaxed text-slate-300"}
                   "I will " [:strong {:class "text-white"} name]
-                  " " cue (when (seq reminder) (str " at " (today/time-label reminder))) "."]]
+                  " " cue
+                  (when (seq reminder) (str " at " (today/time-label reminder)))
+                  ". " (ui/schedule-label {:habit/schedule schedule}) "."]]
                 (when @local-error
                   [:p {:class "text-sm text-rose" :role "alert"} @local-error])
                 (when error
                   [:p {:class "text-sm text-rose" :role "alert"} error])
                 [:div {:class "flex gap-2"}
                  [:button {:type "button" :class "btn btn-ghost flex-1"
-                           :on-click #(do (reset! step 1) (reset! local-error nil))} "Back"]
+                           :on-click #(back! 3)} "Back"]
                  [:button {:type "submit" :class "btn btn-primary flex-[1.4]"}
                   [icons/icon "flame" {:class "h-4 w-4"}] "Light my first flame"]]]])]]
           [:p {:class "mt-5 text-center text-xs leading-relaxed text-slate-400"}
            "No account. No server. Your data stays in this browser."]]]))))
+
+(defn- log-day-row
+  [habit today-iso day dispatch]
+  (let [allowed? (model/quota-allowed-day? habit day)
+        future? (pos? (compare day today-iso))
+        done? (model/done-on? habit day)
+        today? (= day today-iso)
+        disabled? (or future? (not allowed?))
+        label (str (subs (today/long-date day) 0 3) " " (today/short-date day))]
+    [:label {:class (str "flex min-h-12 items-center justify-between gap-3 rounded-xl border px-3 py-2 transition focus-within:ring-2 focus-within:ring-ember-400 focus-within:ring-offset-2 focus-within:ring-offset-ink-900 "
+                         (cond
+                           disabled? "cursor-not-allowed border-white/[0.04] bg-white/[0.01] opacity-45"
+                           done? "cursor-pointer border-spark/25 bg-spark/[0.08]"
+                           :else "cursor-pointer border-white/10 bg-white/[0.025] hover:border-white/20"))}
+     [:span {:class "flex min-w-0 items-center gap-2"}
+      [:input {:type "checkbox"
+               :class "h-4 w-4 accent-spark"
+               :checked done?
+               :disabled disabled?
+               :aria-label (str "Log " (:habit/name habit) " on " label)
+               :on-change #(dispatch [:toggle (:habit/id habit) day])}]
+      [:span {:class "font-display text-sm text-slate-200"} label]
+      (when today?
+        [:span {:class "text-[0.625rem] font-medium uppercase tracking-[0.12em] text-ember-300"} "today"])]
+     [:span {:class "shrink-0 text-[0.6875rem] text-slate-400"}
+      (cond
+        future? "future"
+        (not allowed?) "rest"
+        done? "logged"
+        :else "open")]]))
+
+(defn- log-form
+  [habit today-iso dispatch on-close]
+  (let [days (model/week-days today-iso)
+        target (model/schedule-target habit)
+        progress (model/quota-week-count habit (model/week-start today-iso))
+        complete? (model/week-complete? habit (model/week-start today-iso))]
+    [:div
+     [:div {:class "rounded-2xl border border-white/[0.06] bg-white/[0.025] p-3.5"}
+      [:div {:class "flex items-center justify-between gap-3"}
+       [:p {:class "font-display text-sm font-medium text-white"}
+        (str progress "/" target " sessions this week")]
+       (when complete?
+         [ui/chip {:tone :good} "Week complete"])]
+      [:p {:class "mt-1 text-xs leading-relaxed text-slate-400"}
+       "Only this week can be corrected. Future days stay locked. A session outside the allowed window does not count."]]
+     [:div {:class "mt-4 space-y-1.5"}
+      (for [day days]
+        ^{:key day}
+        [log-day-row habit today-iso day dispatch])]
+     [:div {:class "mt-5 flex justify-end"}
+      [:button {:type "button" :class "btn btn-primary" :on-click on-close}
+       "Done"]]]))
 
 (defn- install-modal
   [{:app/keys [install-event standalone?] :as state} on-close dispatch]
@@ -296,11 +529,12 @@
       [:div
        [:div {:class "rounded-2xl border border-rose/20 bg-rose/[0.06] p-3.5"}
         [:p {:class "text-sm leading-relaxed text-slate-300"}
-         (str "You will lose " (model/total-done habit) " recorded day"
+         (str "You will lose " (model/total-done habit) " recorded session"
               (when (not= 1 (model/total-done habit)) "s")
-              " and a best streak of " (model/longest-streak habit) " days.")]
+              " and a best run of " (model/longest-streak habit) " "
+              (ui/unit-name (model/streak-unit habit) true) ".")]
         [:p {:class "mt-1.5 text-xs leading-relaxed text-slate-400"}
-         "If this ritual holds your best streak, deleting it can also close a flame slot. Archive keeps both."]]
+         "Earned flame slots stay earned. Archive keeps the history and frees the active slot."]]
        [:div {:class "mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"}
         [:button {:type "button" :class "btn btn-ghost"
                   :on-click #(dispatch [:cancel-delete])} "Keep it"]
@@ -321,6 +555,7 @@
                      (reset! modal {:type :add})
                      (dispatch [:error "Every flame slot is full. Archive a ritual or grow a best streak to unlock another."])))
         open-editor (fn [id] (reset! modal {:type :edit :id id}))
+        open-log (fn [id] (reset! modal {:type :log :id id}))
         open-install (fn [] (reset! modal {:type :install}))
         close (fn [] (reset! modal nil))
         request-permission (fn []
@@ -348,7 +583,7 @@
              [brand current dispatch open-install]
              [error-banner current dispatch]
              (case screen
-               :today [today/today-screen current dispatch open-add open-editor]
+               :today [today/today-screen current dispatch open-add open-editor open-log]
                :progress [progress/progress-screen current]
                :settings [settings/settings-screen state dispatch open-install
                           request-permission test-notification]
@@ -393,6 +628,13 @@
                 :on-delete (fn []
                              (dispatch [:ask-delete (:habit/id habit)])
                              (close))}]}]))
+         (when (= :log (:type @modal))
+           (when-let [habit (first (filter #(= (:id @modal) (:habit/id %)) habits))]
+             [ui/modal
+              {:on-close close
+               :title (str "Log a session · " (:habit/name habit))
+               :subtitle "The current week is still editable; the past is not."
+               :content [log-form habit (:app/today current) dispatch close]}]))
          (when (= :install (:type @modal))
           [ui/modal
            {:on-close close

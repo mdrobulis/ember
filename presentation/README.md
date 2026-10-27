@@ -1,6 +1,6 @@
 # Ember — narrated presentation
 
-A ten-slide, two-minute-forty-eight-second product presentation. All of it is
+A ten-slide, three-minute-nine-second product presentation. All of it is
 local: no CDN, no web fonts at runtime, no external images.
 
 ## Open the deck
@@ -23,7 +23,7 @@ continuous narration.
 - `index.html` — the self-contained slide deck.
 - `transcript.md` — every slide's narration with its timing.
 - `audio/slide-01.mp3` … `audio/slide-10.mp3` — per-slide narration.
-- `audio/narration.mp3` — the continuous 2:48 narration.
+- `audio/narration.mp3` — the continuous 3:09 narration.
 - `audio/timings.json` — start times and durations.
 - `ember-deck.pdf` — a printable version (1920×1080 pages).
 - `ember-presentation.mp4` — the narrated video.

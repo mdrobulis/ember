@@ -82,15 +82,17 @@
        [:div
         [:p {:class "font-display text-sm font-semibold text-white"} "Reliable when closed: calendar"]
         [:p {:class "mt-1 text-xs leading-relaxed text-slate-400"}
-         "A daily calendar event with an alarm is the one OS-level reminder a serverless app can create. One tap adds every timed ritual."]]
+         "A scheduled calendar event with an alarm is the one OS-level reminder a serverless app can create. One tap adds every timed ritual."]]
        [icons/icon "calendar" {:class "h-5 w-5 shrink-0 text-frost"}]]
       (if (seq timed)
         [:<>
          [:ul {:class "mt-3 space-y-1.5"}
           (for [habit timed]
             ^{:key (:habit/id habit)}
-            [:li {:class "flex items-center justify-between gap-2 text-xs"}
-             [:span {:class "truncate text-slate-300"} (:habit/name habit)]
+            [:li {:class "flex items-center justify-between gap-3 text-xs"}
+             [:div {:class "min-w-0"}
+              [:p {:class "truncate text-slate-300"} (:habit/name habit)]
+              [:p {:class "mt-0.5 text-[0.625rem] text-slate-400"} (ui/schedule-label habit)]]
              [:span {:class "shrink-0 font-display tabular text-slate-400"}
               (today/time-label (:habit/reminder habit))]])]
          [:button {:type "button"
@@ -103,7 +105,7 @@
                                   (dispatch [:error "No timed ritual to add. Set a time when you edit a habit."])))}
           [icons/icon "calendar" {:class "h-4 w-4"}] "Add all to calendar"]
          [:p {:class "mt-2 text-[0.6875rem] leading-relaxed text-slate-400"}
-          "This downloads an .ics file. Open it to add a repeating daily alarm to your calendar."]]
+          "This downloads an .ics file. Open it to add recurring scheduled alarms to your calendar."]]
         [:p {:class "mt-3 text-xs text-slate-400"}
          "No timed rituals yet. Open a ritual, choose Edit, and set a time."])]]))
 
@@ -182,7 +184,9 @@
            [:div {:class "min-w-0"}
             [:p {:class "truncate font-display text-sm font-medium text-slate-200"} (:habit/name habit)]
             [:p {:class "text-[0.6875rem] text-slate-400"}
-             (str (model/total-done habit) " shows · best " (model/longest-streak habit) "d")]]
+             (str (model/total-done habit) " sessions · best "
+                  (model/longest-streak habit)
+                  (ui/unit-short (model/streak-unit habit)))]]
            [:div {:class "flex shrink-0 gap-1"}
             [:button {:type "button" :class "btn btn-quiet min-h-9 px-2.5 text-xs"
                       :on-click #(dispatch [:unarchive (:habit/id habit)])} "Restore"]
@@ -229,13 +233,13 @@
    [:div {:class "mt-4 space-y-3"}
     [ui/bullet {:icon "flame" :tone :warn
                 :title "Loss aversion, with a curfew"
-                :body "The flame matters. At-risk language appears only after 20:00, only when the habit is really incomplete."}]
+                :body "The flame matters. At-risk language appears only after 20:00, on a real deadline, when the period is really incomplete."}]
     [ui/bullet {:icon "lock" :tone :warn
                 :title "Scarcity that is earned"
-                :body "One slot to begin; 3, 7, 14 and 30-day best streaks unlock the rest. A slot can never be bought or taken away."}]
+                :body "One slot to begin. A 3/7/14/30 scheduled-day run or a 1/2/4/8-week run unlocks the rest. A slot can never be bought or taken away."}]
     [ui/bullet {:icon "shield" :tone :cool
                 :title "A landing net, not a time machine"
-                :body "Seven completions earn a shield. It can repair yesterday, never today or the future, and it never unlocks a slot."}]
+                :body "Seven sessions earn a shield. It repairs yesterday, or freezes the previous quota week, and never unlocks a slot."}]
     [ui/bullet {:icon "refresh" :tone :good
                 :title "The weekly fresh start"
                 :body "The chapter resets on Monday. Lifetime shows and best streaks never do. A bad week costs a week."}]

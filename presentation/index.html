@@ -387,6 +387,23 @@
     line-height: 1.4;
   }
 
+  .cadence-card {
+    padding: 16px 18px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: rgba(255,255,255,.025);
+  }
+  .cadence-card h3 { margin: 10px 0 5px; font-size: clamp(16px, 1.2vw, 21px); }
+  .cadence-card p { margin: 0; color: var(--muted); font-size: clamp(10px, .78vw, 13px); line-height: 1.4; }
+  .cadence-card .tag {
+    color: var(--ember);
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
   .engine-card {
     padding: 22px;
     border: 1px solid var(--line);
@@ -724,7 +741,7 @@
           <span class="done"></span><span class="done"></span><span class="gap"></span><span class="shield"></span><span class="done"></span>
           <span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span>
         </div>
-        <div class="chain-copy"><strong>One gap is not a verdict.</strong>A shield covers yesterday. The chain survives, and the habit gets another day.</div>
+        <div class="chain-copy"><strong>One gap is not a verdict.</strong>A shield covers the previous missed period. The chain survives, and the habit gets another chance.</div>
       </div>
     </div>
     <footer class="footer"><span>Ember · 2026</span><span>Research: Lally et al., EJSP 2010</span></footer>
@@ -761,28 +778,28 @@
     <header class="topbar">
       <div class="brand">
         <img src="assets/ember-icon.png" alt="">
-        <div><div class="brand-name">EMBER</div><div class="brand-sub">The slot ladder</div></div>
+        <div><div class="brand-name">EMBER</div><div class="brand-sub">Any rhythm, one ladder</div></div>
       </div>
       <div class="slide-no"><b>04</b> / 10</div>
     </header>
     <div class="content">
-      <p class="eyebrow">Scarcity that teaches</p>
-      <h2>Start with one.<br>Earn the right to<br><span class="grad">carry more.</span></h2>
-      <div class="ladder">
-        <div class="ladder-node"><div class="flame-dot">1</div><div class="ladder-label">Start</div><div class="ladder-sub">Day one</div></div>
-        <div class="ladder-node"><div class="flame-dot">2</div><div class="ladder-label">3-day best</div><div class="ladder-sub">Return proven</div></div>
-        <div class="ladder-node"><div class="flame-dot">3</div><div class="ladder-label">7-day best</div><div class="ladder-sub">A week</div></div>
-        <div class="ladder-node"><div class="flame-dot">4</div><div class="ladder-label">14-day best</div><div class="ladder-sub">Two weeks</div></div>
-        <div class="ladder-node"><div class="flame-dot">5</div><div class="ladder-label">30-day best</div><div class="ladder-sub">A month</div></div>
+      <p class="eyebrow">Daily. Fixed days. Weekly targets.</p>
+      <h2>Any rhythm.<br>One <span class="grad">ladder.</span></h2>
+      <div class="three-col" style="margin-top:20px">
+        <div class="cadence-card"><span class="tag">Every day</span><h3>One completion</h3><p>The original flame. Every calendar day is due.</p></div>
+        <div class="cadence-card"><span class="tag">Specific days</span><h3>Only chosen days</h3><p>Off days are neutral rest days. They never break the chain.</p></div>
+        <div class="cadence-card"><span class="tag">Times per week</span><h3>N sessions by the deadline</h3><p>Flexible by default, or restricted to an allowed-day window.</p></div>
       </div>
-      <div class="three-col">
-        <div class="stat"><div class="stat-value" style="font-size:clamp(22px,2vw,34px)">Never bought</div><div class="stat-note" style="margin-top:10px">No store, no currency, no loot box. Only evidence.</div></div>
-        <div class="stat"><div class="stat-value" style="font-size:clamp(22px,2vw,34px)">Never farmed</div><div class="stat-note" style="margin-top:10px">Shields repair the visible streak, but never unlock a slot.</div></div>
-        <div class="stat"><div class="stat-value" style="font-size:clamp(22px,2vw,34px)">Never lost</div><div class="stat-note" style="margin-top:10px">Archive keeps history and capacity. Deleting the evidence is the only exit.</div></div>
+      <div class="ladder" style="margin:22px 0 18px">
+        <div class="ladder-node"><div class="flame-dot">1</div><div class="ladder-label">Start</div><div class="ladder-sub">One promise</div></div>
+        <div class="ladder-node"><div class="flame-dot">2</div><div class="ladder-label">Proof 1</div><div class="ladder-sub">3 sched. days / 1 week</div></div>
+        <div class="ladder-node"><div class="flame-dot">3</div><div class="ladder-label">Proof 2</div><div class="ladder-sub">7 sched. days / 2 weeks</div></div>
+        <div class="ladder-node"><div class="flame-dot">4</div><div class="ladder-label">Proof 3</div><div class="ladder-sub">14 sched. days / 4 weeks</div></div>
+        <div class="ladder-node"><div class="flame-dot">5</div><div class="ladder-label">Proof 4</div><div class="ladder-sub">30 sched. days / 8 weeks</div></div>
       </div>
-      <div class="quote">The limit is the product: few promises, kept.</div>
+      <div class="quote">Daily and fixed-day runs count scheduled days. A quota counts weeks that hit the target. Both feed the same four proof rungs.</div>
     </div>
-    <footer class="footer"><span>Ember · 2026</span><span>1 → 5 slots</span></footer>
+    <footer class="footer"><span>Ember · 2026</span><span>Any rhythm → 5 slots</span></footer>
   </section>
 
   <section class="slide" data-audio="audio/slide-05.mp3">
@@ -798,7 +815,7 @@
       <h2>Four mechanisms.<br>One <span class="grad">honest</span> loop.</h2>
       <div class="cards-2" style="margin-top:26px">
         <div class="engine-card"><span class="tag">Implementation intentions</span><h3>Name the moment</h3><p>A cue and a time turn “I should” into “when X, I will Y”.</p><cite>94 tests, medium-to-large effect, d = 0.65. Gollwitzer &amp; Sheeran, 2006.</cite></div>
-        <div class="engine-card"><span class="tag">Recovery</span><h3>One miss is not the habit</h3><p>Seven completions earn a shield. It repairs yesterday, not the record.</p><cite>Repair attenuates the engagement drop after a broken streak. Silverman &amp; Barasch, 2023.</cite></div>
+        <div class="engine-card"><span class="tag">Recovery</span><h3>One miss is not the habit</h3><p>Seven sessions earn a shield. It covers the previous missed period, not the record.</p><cite>Repair attenuates the engagement drop after a broken streak. Silverman &amp; Barasch, 2023.</cite></div>
         <div class="engine-card"><span class="tag">Goal gradient</span><h3>Show the real distance</h3><p>The next slot is a real threshold with a real bar. No fake stamps.</p><cite>Effort rises near a goal. Kivetz, Urminsky &amp; Zheng, 2006.</cite></div>
         <div class="engine-card"><span class="tag">Loss aversion</span><h3>Pressure with a curfew</h3><p>At-risk copy appears only after 20:00, only for a ritual that is actually dark.</p><cite>Losses loom larger than gains. Kahneman &amp; Tversky, 1979.</cite></div>
       </div>
@@ -822,11 +839,11 @@
         <div class="compare-box">
           <div class="compare-head"><span class="dot"></span>Used, transparently</div>
           <ul>
-            <li>Earned scarcity — one slot, then 3 / 7 / 14 / 30 days</li>
+            <li>Earned scarcity — 3/7/14/30 scheduled days or 1/2/4/8 weeks</li>
             <li>Real loss aversion — a real flame, after 20:00</li>
             <li>Goal gradient — the actual distance to the next slot</li>
             <li>Commitment — a cue, a time, a one-line reason</li>
-            <li>Recovery — a shield that can only cover yesterday</li>
+            <li>Recovery — a shield that covers the previous missed period</li>
           </ul>
         </div>
         <div class="compare-box refuse">
@@ -867,7 +884,7 @@
         <div class="tl-card">
           <div class="big-icon">▤</div>
           <h3>App closed: the calendar</h3>
-          <p>A closed serverless PWA cannot schedule a local notification. One tap exports a daily .ics event with an alarm for every timed ritual.</p>
+          <p>A closed serverless PWA cannot schedule a local notification. One tap exports recurring .ics alarms for every timed ritual.</p>
           <span class="mini">OS-level alarm · no server</span>
         </div>
       </div>
@@ -921,19 +938,19 @@
       <p class="eyebrow">Small surface, tested core</p>
       <h2>The evidence<br>is in the <span class="grad">build.</span></h2>
       <div class="metric-grid">
-        <div class="metric"><strong>28</strong><span>tests in the pure domain</span></div>
-        <div class="metric"><strong>102</strong><span>assertions, 0 failures</span></div>
+        <div class="metric"><strong>41</strong><span>tests in the pure domain</span></div>
+        <div class="metric"><strong>168</strong><span>assertions, 0 failures</span></div>
         <div class="metric"><strong>320</strong><span>px minimum width exercised</span></div>
         <div class="metric"><strong>0</strong><span>backend or third-party calls</span></div>
-        <div class="metric"><strong>1</strong><span>tap to light a ritual</span></div>
+        <div class="metric"><strong>3</strong><span>cadences: daily, fixed, quota</span></div>
         <div class="metric"><strong>5</strong><span>slots, never purchasable</span></div>
       </div>
       <div class="stack">
         <span>ClojureScript</span><span>Reagent</span><span>Tailwind dark</span><span>PWA</span><span>localStorage</span><span>cljs.test</span><span>No backend</span>
       </div>
-      <div class="note-strip">Browser exercise: onboarding · persistence across reload · shield repair · archive · slot limit · JSON export/import · .ics download · keyboard focus + Escape · 320/390/768 px · offline reload.</div>
+      <div class="note-strip">Browser exercise: three cadences · current-week logging · persistence · shield repair · archive · slot limit · JSON round trip · .ics · keyboard · 320/390/768 px · offline.</div>
       <div class="arch-row">
-        <div class="arch-box"><span>01</span><b>Pure domain</b><p>model.cljs: dates, streaks, slots, shields, reminders, iCalendar.</p></div>
+        <div class="arch-box"><span>01</span><b>Pure domain</b><p>model.cljs: cadence, runs, slots, shields, reminders, iCalendar.</p></div>
         <div class="arch-arrow">→</div>
         <div class="arch-box"><span>02</span><b>One atom</b><p>main.cljs owns the clock, ids and the persistence watch.</p></div>
         <div class="arch-arrow">→</div>

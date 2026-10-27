@@ -1,8 +1,10 @@
 (ns habits.ui
   "Small visual primitives shared by the screens. Every state is encoded in
   text as well as colour, and every interactive element is a native control."
-  (:require [reagent.core :as r]
-            [habits.icons :as icons]))
+  (:require [clojure.string :as str]
+            [reagent.core :as r]
+            [habits.icons :as icons]
+            [habits.model :as model]))
 
 (def ^:private pieces
   (mapv (fn [i]
@@ -70,6 +72,69 @@
                           (or class "")))}
      (when icon [icons/icon icon {:class "h-3.5 w-3.5"}])
      body]))
+
+
+(def ^:private weekday-short
+  {1 "Mon" 2 "Tue" 3 "Wed" 4 "Thu" 5 "Fri" 6 "Sat" 7 "Sun"})
+
+(def ^:private weekday-options
+  [[1 "Mon"] [2 "Tue"] [3 "Wed"] [4 "Thu"] [5 "Fri"] [6 "Sat"] [7 "Sun"]])
+
+(defn weekday-options-list
+  "The ordered weekday labels used by the schedule pickers."
+  []
+  weekday-options)
+
+(defn schedule-days-label
+  "A readable list of ISO weekdays, or nil for none."
+  [days]
+  (when (seq days)
+    (str/join " · " (map #(get weekday-short %) (sort days)))))
+
+(defn schedule-label
+  "A compact cadence label: `Every day`, `Mon · Wed · Fri`, `3×/week`."
+  [habit]
+  (let [schedule (model/schedule-of habit)
+        type (:schedule/type schedule)
+        days (:schedule/days schedule)]
+    (case type
+      :fixed-days
+      (let [days (set days)]
+        (cond
+          (= days #{1 2 3 4 5}) "Weekdays"
+          (= days #{6 7}) "Weekends"
+          (= days #{1 2 3 4 5 6 7}) "Every day"
+          :else (or (schedule-days-label days) "Specific days")))
+
+      :weekly-quota
+      (let [base (str (:schedule/target schedule) "×/week")]
+        (cond
+          (nil? days) base
+          (= (set days) #{1 2 3 4 5}) (str base " · weekdays")
+          (= (set days) #{6 7}) (str base " · weekends")
+          (= (set days) #{1 2 3 4 5 6 7}) base
+          :else (str base " · " (schedule-days-label days))))
+
+      "Every day")))
+
+(defn streak-label
+  "`3 days` or `2 weeks`."
+  [value unit]
+  (str value " " (if (= unit :week)
+                   (if (= 1 value) "week" "weeks")
+                   (if (= 1 value) "day" "days"))))
+
+(defn unit-short
+  "`d` or `w` for compact run labels."
+  [unit]
+  (if (= unit :week) "w" "d"))
+
+(defn unit-name
+  "The full unit name, singular or plural."
+  [unit plural?]
+  (if (= unit :week)
+    (if plural? "weeks" "week")
+    (if plural? "days" "day")))
 
 (defn stat
   "A labelled number with an optional sub-label and icon."

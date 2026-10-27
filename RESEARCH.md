@@ -1,8 +1,8 @@
 # Ember — research brief
 
 **Question.** What can a local-first, single-user habit app do that is genuinely
-useful for building a daily habit, and which persuasive mechanics are worth the
-risk?
+useful for building a recurring habit, and which persuasive mechanics are
+worth the risk?
 
 This is a design brief, not a literature review. Each finding is followed by the
 decision it caused in Ember. Effect sizes are reported only where the source
@@ -46,9 +46,9 @@ the self, and **attenuated when consumers could repair the streak**.
 ([Silverman & Barasch, 2023, *Journal of Consumer Research*](https://doi.org/10.1093/jcr/ucac029))
 
 **Decision.** The streak is the hero number. A broken chain is not a dead end:
-the user can spend an earned shield to repair *yesterday*. Repairs do not count
-as completions and do not unlock slots, so the mechanic protects a streak
-without fabricating success.
+the user can spend an earned shield to cover the previous missed scheduled day,
+or freeze the previous quota week. Repairs do not count as completions and do
+not unlock slots, so the mechanic protects a streak without fabricating success.
 
 ### 1.4 People accelerate near a goal
 
@@ -170,7 +170,7 @@ they still choose it?** The Settings screen includes a plain-language
 1. **While the app is open or installed and running**, a minute tick checks
    timed habits and shows a system notification via the service worker. If
    permission is unavailable, the same event becomes an in-app alert.
-2. **When the app is closed**, a one-tap `.ics` download creates a daily calendar
+2. **When the app is closed**, a one-tap `.ics` download creates a recurring calendar
    event with an alarm for each timed habit. The phone's calendar is the
    scheduler; no server is involved.
 

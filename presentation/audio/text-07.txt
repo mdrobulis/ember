@@ -1,1 +1,1 @@
-Timed rituals are honest about the platform. A closed serverless web app cannot schedule a local notification. While Ember is open, a minute tick can send one. When it is closed, one tap exports a daily calendar alarm. No permission theatre, no fake push, no promise the web cannot keep.
+Timed rituals are honest about the platform. A closed serverless web app cannot schedule a local notification. While Ember is open, a minute tick can send one. When it is closed, one tap exports a recurring calendar alarm. No permission theatre, no fake push, no promise the web cannot keep.

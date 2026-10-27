@@ -46,7 +46,7 @@
                                (if current? "text-ember-300" "text-slate-400"))}
             (weekday-initial day)]]))]
      [:p {:class "mt-3 text-[0.6875rem] leading-relaxed text-slate-400"}
-      "Counts real completions across active rituals. Repaired days are shields, not completions."]]))
+      "Counts real sessions across active rituals. Repaired periods are shields, not sessions."]]))
 
 (defn- heatmap
   [habit today-iso]
@@ -61,20 +61,26 @@
         (str complete "/35 done"
              (when (pos? repaired) (str " · " repaired " repaired")))]]
       [:span {:class "chip shrink-0 border-ember-400/20 bg-ember-500/10 text-ember-200"}
-       (str (model/current-streak habit today-iso) "d")]]
+       (str (model/current-streak habit today-iso) (ui/unit-short (model/streak-unit habit))) ]]
      [:div {:class "mt-3 grid grid-cols-7 gap-1" :aria-hidden "true"}
-      (for [{:keys [day done repaired]} cells]
+      (for [{:keys [day done repaired rest? missed?]} cells]
         ^{:key day}
         [:span {:class (str "heat-cell "
                             (cond repaired "heat-cell--repaired"
                                   done "heat-cell--done"
+                                  rest? "heat-cell--rest"
+                                  missed? "heat-cell--missed"
                                   :else ""))
-                :title (str day (cond repaired " · repaired" done " · done" :else " · open"))}])]
-     [:div {:class "mt-2 flex items-center gap-3 text-[0.625rem] text-slate-400"}
+                :title (str day (cond repaired " · repaired" done " · done" rest? " · rest" missed? " · missed" :else " · open"))}])]
+     [:div {:class "mt-2 flex flex-wrap items-center gap-3 text-[0.625rem] text-slate-400"}
       [:span {:class "flex items-center gap-1"}
        [:span {:class "h-2.5 w-2.5 rounded-[0.2rem] bg-ember-400"}] "done"]
       [:span {:class "flex items-center gap-1"}
        [:span {:class "h-2.5 w-2.5 rounded-[0.2rem] bg-frost/40"}] "shield"]
+      [:span {:class "flex items-center gap-1"}
+       [:span {:class "h-2.5 w-2.5 rounded-[0.2rem] border border-white/10 bg-white/[0.03]"}] "rest"]
+      [:span {:class "flex items-center gap-1"}
+       [:span {:class "h-2.5 w-2.5 rounded-[0.2rem] border border-rose/25 bg-rose/15"}] "missed"]
       [:span "35 days"]]]))
 
 (defn progress-screen
@@ -83,7 +89,11 @@
   (let [habits (model/sort-habits (model/active-habits state))
         rates (map #(model/completion-rate % today 30) habits)
         avg-rate (if (seq rates) (js/Math.round (/ (reduce + rates) (count rates))) 0)
-        best (model/global-best-streak list)
+        best (model/global-best-habit list)
+        best-value (if best (str (:best best) (ui/unit-short (:unit best))) "—")
+        best-sub (if best
+                   (str (:habit/name (:habit best)) " · " (ui/schedule-label (:habit best)))
+                   "No run yet")
         shows (model/total-shows (model/active-habits state))
         shields (reduce + 0 (map model/shield-balance habits))]
     [:div {:class "animate-slide-up"}
@@ -98,19 +108,19 @@
          :body "Light one flame on Today. The numbers will follow the tap."}]
        [:<>
         [:div {:class "grid grid-cols-2 gap-2.5 sm:grid-cols-4"}
-         [ui/stat {:label "Best streak" :value (str best "d")
-                   :sub "All-time, real completions" :icon "target" :tone :warn}]
-         [ui/stat {:label "30-day rate" :value (str avg-rate "%")
-                   :sub "Mean across active rituals" :icon "chart"}]
-         [ui/stat {:label "Shows" :value (str shows)
-                   :sub "Active rituals, all time" :icon "check"}]
+         [ui/stat {:label "Best run" :value best-value
+                   :sub best-sub :icon "target" :tone :warn}]
+         [ui/stat {:label "Rate (30d)" :value (str avg-rate "%")
+                   :sub "Due periods, active rituals" :icon "chart"}]
+         [ui/stat {:label "Sessions" :value (str shows)
+                   :sub "Real sessions, all time" :icon "check"}]
          [ui/stat {:label "Shields" :value (str shields)
                    :sub "Banked and ready" :icon "shield"}]]
         [weekly-chart habits today]
         [:section {:class "mt-6"}
          [ui/section-heading {:eyebrow "Five weeks at a glance" :title "Heatmaps"}]
          [:p {:class "mb-3 text-xs leading-relaxed text-slate-400"}
-          "Bright means done. Cyan means a shield held the line. Empty means life happened; it is allowed."]
+          "Bright means done. Cyan means a shield held the line. A faint cell is a rest day or an open day."]
          [:div {:class "grid gap-2.5 sm:grid-cols-2"}
           (for [habit habits]
             ^{:key (:habit/id habit)}
@@ -134,15 +144,15 @@
                [:th {:class "max-w-[8rem] truncate px-2 py-3 font-medium text-slate-200 sm:max-w-[12rem] sm:px-3" :scope "row"}
                 (:habit/name habit)]
                [:td {:class "px-1.5 py-3 text-right tabular text-ember-300"}
-                (model/current-streak habit today)]
+                (str (model/current-streak habit today) (ui/unit-short (model/streak-unit habit)))]
                [:td {:class "px-1.5 py-3 text-right tabular text-slate-300"}
-                (model/longest-streak habit)]
+                (str (model/longest-streak habit) (ui/unit-short (model/streak-unit habit)))]
                [:td {:class "px-2 py-3 text-right tabular text-slate-300"}
                 (str (model/completion-rate habit today 30) "%")]
                [:td {:class "hidden px-2 py-3 text-right tabular text-frost sm:table-cell sm:px-3"}
                 (model/shield-balance habit)]])]]]
          [:p {:class "mt-2 text-[0.625rem] text-slate-400"}
-          "Live and best count real days. A shield protects the visible streak but never counts as a completion."]]
+          "Live and best are shown in each ritual's cadence unit. A shield protects the visible streak but never counts as a session."]]
         [:div {:class "mt-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4"}
          [:p {:class "display text-sm text-white"} "Why the week resets"]
          [:p {:class "mt-1 text-xs leading-relaxed text-slate-400"}

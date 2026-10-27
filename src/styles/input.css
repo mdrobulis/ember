@@ -212,6 +212,14 @@
     @apply border-frost/40 bg-frost/40;
   }
 
+  .heat-cell--rest {
+    @apply border-white/[0.04] bg-transparent;
+  }
+
+  .heat-cell--missed {
+    @apply border-rose/20 bg-rose/[0.08];
+  }
+
   .heat-cell--future {
     @apply bg-transparent opacity-30;
   }

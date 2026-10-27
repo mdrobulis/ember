@@ -38,6 +38,7 @@
           [:path {:d "M12 11v5M12 8h.01" :stroke-linecap "round"}]]
    :clock [[:circle {:cx "12" :cy "12" :r "9"}]
            [:path {:d "M12 7v5l3.5 2" :stroke-linecap "round" :stroke-linejoin "round"}]]
+   :moon [[:path {:d "M20 15.3A8.3 8.3 0 0 1 8.7 4 5.7 5.7 0 0 0 6 15.9 7 7 0 0 0 20 15.3Z" :stroke-linejoin "round"}]]
    :phone [[:rect {:x "6" :y "2.5" :width "12" :height "19" :rx "3"}]
            [:path {:d "M10 18.5h4" :stroke-linecap "round"}]]
    :globe [[:circle {:cx "12" :cy "12" :r "9"}]
