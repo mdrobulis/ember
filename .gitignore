@@ -1,0 +1,10 @@
+# Build output
+node_modules/
+.npm-cache/
+.shadow-cljs/
+out/
+public/js/
+
+# Local machine files
+.DS_Store
+*.log

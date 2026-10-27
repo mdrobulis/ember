@@ -1,0 +1,1 @@
+This is where dark patterns usually enter. Ember uses pressure, not deception. No confirm-shaming, no fake urgency, no invented social proof, no countdowns, no hidden costs. The Settings screen lists every lever and its guardrail. If a user could read the mechanic and still choose it, it stays.

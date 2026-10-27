@@ -1,0 +1,55 @@
+{
+  "total": 168.18,
+  "slides": [
+    {
+      "slide": 1,
+      "start": 0.0,
+      "duration": 9.264
+    },
+    {
+      "slide": 2,
+      "start": 9.964,
+      "duration": 21.72
+    },
+    {
+      "slide": 3,
+      "start": 32.384,
+      "duration": 15.576
+    },
+    {
+      "slide": 4,
+      "start": 48.66,
+      "duration": 14.832
+    },
+    {
+      "slide": 5,
+      "start": 64.192,
+      "duration": 24.48
+    },
+    {
+      "slide": 6,
+      "start": 89.372,
+      "duration": 19.248
+    },
+    {
+      "slide": 7,
+      "start": 109.32,
+      "duration": 18.048
+    },
+    {
+      "slide": 8,
+      "start": 128.068,
+      "duration": 13.2
+    },
+    {
+      "slide": 9,
+      "start": 141.968,
+      "duration": 21.624
+    },
+    {
+      "slide": 10,
+      "start": 164.292,
+      "duration": 3.888
+    }
+  ]
+}

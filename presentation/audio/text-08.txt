@@ -1,0 +1,1 @@
+Ember installs from Safari on iPhone and Chrome on Android, launches standalone, and loads offline from a service worker. Data stays in local storage. Export is the backup, because iOS can evict site data.

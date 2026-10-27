@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ember">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#151d2b"/>
+      <stop offset="1" stop-color="#07090e"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="46%" r="52%">
+      <stop offset="0" stop-color="#f97316" stop-opacity="0.55"/>
+      <stop offset="0.55" stop-color="#f97316" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#f97316" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="flame" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#fde68a"/>
+      <stop offset="0.35" stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#f97316"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fcd34d" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#f97316" stop-opacity="0.05"/>
+    </linearGradient>
+    <clipPath id="tile">
+      <rect width="512" height="512" rx="116"/>
+    </clipPath>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <g clip-path="url(#tile)">
+    <circle cx="256" cy="230" r="196" fill="url(#glow)"/>
+    <circle cx="256" cy="208" r="143" fill="none" stroke="url(#rim)" stroke-width="2"/>
+    <g transform="translate(64 40) scale(16)">
+      <path d="M12 22c4.1 0 7-2.7 7-6.6 0-2.7-1.6-4.8-3.2-6.5-.4 1.5-1.2 2.5-2.1 3.1.2-3.9-1.5-7-4.2-9.5.1 3.3-1.3 5.3-2.5 7.1C5.8 11.3 5 12.9 5 15.4 5 19.3 7.9 22 12 22Z" fill="url(#flame)"/>
+      <path d="M12 18.6c1.9 0 3.3-1.3 3.3-3.1 0-1.3-.7-2.3-1.5-3.1-.2.8-.6 1.3-1.1 1.6.1-2-.8-3.6-2.1-4.9.1 1.7-.6 2.7-1.2 3.7-.6.8-.9 1.6-.9 2.7 0 1.8 1.5 3.1 3.5 3.1Z" fill="#0b0f17" opacity="0.84"/>
+    </g>
+  </g>
+  <rect x="1" y="1" width="510" height="510" rx="115" fill="none" stroke="#ffffff" stroke-opacity="0.09" stroke-width="2"/>
+</svg>

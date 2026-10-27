@@ -1,0 +1,1 @@
+Ember is a habit tracker built around one small flame. It is local-first, installable, and deliberately limits how many habits you can carry at once.

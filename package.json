@@ -1,0 +1,22 @@
+{
+  "name": "habits",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ember \u2014 a local-first, installable habit tracker with streaks that earn slots. ClojureScript + Reagent + Tailwind.",
+  "scripts": {
+    "dev": "npm run css && shadow-cljs watch app",
+    "css": "tailwindcss -i ./src/styles/input.css -o ./public/css/app.css --minify",
+    "css:watch": "tailwindcss -i ./src/styles/input.css -o ./public/css/app.css --watch",
+    "build": "npm run css && shadow-cljs release app",
+    "test": "shadow-cljs compile test && node out/test.js",
+    "clean": "rm -rf .shadow-cljs out public/js"
+  },
+  "devDependencies": {
+    "shadow-cljs": "^3.5.7",
+    "tailwindcss": "^3.4.17"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
